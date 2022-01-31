@@ -49,7 +49,7 @@ def update_screen(ai_settings,screen,ship,aliens,bullets):
 	# 让最近绘制的图像可见
 	pygame.display.flip()
 
-def update_bullets(bullets):
+def update_bullets(aliens,bullets):
 	"""更新子弹的位置，并删除已经消失的子弹"""
 	bullets.update()
 
@@ -57,6 +57,10 @@ def update_bullets(bullets):
 	for bullet in bullets.copy():
 		if bullet.rect.bottom <=0:
 			bullets.remove(bullet)
+
+	# 检查是否有子弹击中了外星人
+	# 如果是这样，就删除相应的子弹和外星人
+	collisions = pygame.sprite.groupcollide(bullets,aliens,True,True)
 
 def fire_bullet(ai_settings,screen,ship,bullets):
 	"""如果还没有达到限制，就发射一颗子弹"""
@@ -76,6 +80,15 @@ def create_fleet(ai_settings,screen,ship,aliens):
 		for alien_number in range(number_aliens_x):
 			create_alien(ai_settings,screen,aliens,alien_number,row_number)	
 
+def create_alien(ai_settings,screen,aliens,alien_number,row_number):
+	# 创建一个外星人并将其加入当前行
+	alien = Alien(ai_settings,screen)
+	alien_width = alien.rect.width
+	alien.x = alien_width + 2 * alien_width * alien_number
+	alien.rect.x = alien.x
+	alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
+	aliens.add(alien)
+
 def get_number_aliens_x(ai_settings,alien_width):
 	"""计算每行可容纳多少个外星人"""
 	available_space_x = ai_settings.screen_width - 2 * alien_width
@@ -87,15 +100,6 @@ def get_number_rows(ai_settings,ship_height,alien_height):
 	available_space_y = (ai_settings.screen_height - (3 * alien_height) - ship_height)
 	number_rows = int(available_space_y / ( 2 * alien_height ))
 	return number_rows
-
-def create_alien(ai_settings,screen,aliens,alien_number,row_number):
-	# 创建一个外星人并将其加入当前行
-	alien = Alien(ai_settings,screen)
-	alien_width = alien.rect.width
-	alien.x = alien_width + 2 * alien_width * alien_number
-	alien.rect.x = alien.x
-	alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
-	aliens.add(alien)
 
 def update_aliens(ai_settings,aliens):
 	"""更新外星人群中所有外星人的位置"""
@@ -114,3 +118,4 @@ def change_fleet_direction(ai_settings,aliens):
 	for alien in aliens.sprites():
 		alien.rect.y += ai_settings.fleet_drop_speed
 	ai_settings.fleet_direction *= -1
+
