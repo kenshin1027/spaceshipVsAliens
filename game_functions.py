@@ -57,7 +57,9 @@ def update_bullets(ai_settings,screen,ship,aliens,bullets):
 	for bullet in bullets.copy():
 		if bullet.rect.bottom <=0:
 			bullets.remove(bullet)
+	check_bullet_alien_collisions(ai_settings,screen,ship,aliens,bullets)
 
+def check_bullet_alien_collisions(ai_settings,screen,ship,aliens,bullets):
 	# 检查是否有子弹击中了外星人
 	# 如果是这样，就删除相应的子弹和外星人
 	collisions = pygame.sprite.groupcollide(bullets,aliens,True,True)
@@ -106,10 +108,14 @@ def get_number_rows(ai_settings,ship_height,alien_height):
 	number_rows = int(available_space_y / ( 2 * alien_height ))
 	return number_rows
 
-def update_aliens(ai_settings,aliens):
+def update_aliens(ai_settings,ship,aliens):
 	"""更新外星人群中所有外星人的位置"""
 	check_fleet_edges(ai_settings,aliens)
 	aliens.update()
+
+	# 检测外星人和飞船之间的碰撞
+	if pygame.sprite.spritecollideany(ship,aliens):
+		print("Ship hit!!!")
 
 def check_fleet_edges(ai_settings,aliens):
 	"""有外星人到达边缘时采取相应措施"""
